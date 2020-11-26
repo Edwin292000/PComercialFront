@@ -1,41 +1,101 @@
 <template>
   <div class="hello">
-    <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-router" target="_blank" rel="noopener">router</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint" target="_blank" rel="noopener">eslint</a></li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
+    <h1>Tercer Parcial Edwin</h1>
+    <h1>datos recibidos</h1>
+    <div v-for="datos in tareas" :key="datos.id">
+      <div style="border-style: solid; border-width: thin; margin:25px;">
+        <h1>{{datos.titulo}}</h1>
+      </div>
+      
+    </div>
+    <button @click="agregar()">Agregar</button>
+    
+    <ApolloMutation
+      :mutation="gql => gql`
+          mutation createEstado($descripcion: String!){
+            createEstado(descripcion:$descripcion){
+              nombre
+            }
+          }
+        `"
+      :variables="{desc}"
+      @done="onDone"
+      :optimisticResponse="{
+          __typename: 'Mutation',
+          someWork: {
+            __typename: 'SomeWorkPayload',
+            success: true,
+            timeSpent: 100,
+          },
+        }"
+    >
+      <template v-slot="{ mutate, loading, error }">
+        <button :disabled="loading" @click="mutate()">Agregar</button>
+        <p v-if="error">An error occurred: {{ error }}</p>
+      </template>
+    </ApolloMutation> 
+
   </div>
 </template>
 
 <script>
+import gql from 'graphql-tag'
+
+const ADD_TODO= gql `
+mutation createEstado($nombre:String!, $decripcion:String!){
+  createEstado(nombre:"datas", descripcion:"datas"){
+    nombre
+  }
+}
+
+`
 export default {
   name: 'HelloWorld',
   props: {
     msg: String
+  },
+  data() {
+    return {
+      count: 4,
+      nombre: "fin",
+      desc: "termindo",
+    };
+  },
+  methods:{
+    onDone(val) {
+      console.log(val)
+      //this.ret = val.data.register.token;
+    },
+    agregar: function(){
+      
+      //console.log('agregar')
+      const n=""
+      const d=""
+      this.$apollo.mutate({
+        mutation: ADD_TODO,
+        variables:{
+          nombre:n,
+          descripcion:d
+        },
+      }).catch((res) => {
+        console.log(res)
+      const errors = res.graphQLErrors.map((error) => {
+        return error.message;
+      });
+      console.log(errors)
+    });
+    }
+  },
+  apollo:{
+        tareas: gql `
+          query {
+              tareas{
+                  id
+                  titulo
+                  descripcion
+              }
+          }
+      `
   }
 }
 </script>

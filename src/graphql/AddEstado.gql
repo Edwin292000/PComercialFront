@@ -1,0 +1,6 @@
+
+mutation createEstado($descripcion: String!,$nombre:String!){
+  createEstado(descripcion:$descripcion,nombre:$nombre){
+    nombre
+  }
+}
